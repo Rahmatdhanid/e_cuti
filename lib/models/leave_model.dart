@@ -1,28 +1,30 @@
+// File: lib/models/leave_model.dart
+
 enum LeaveStatus { pendingKabid, pendingKadin, approved, rejected }
 enum Role { user, kabid, kadin }
 
 class LeaveRequest {
   String id;
-  // Data Pegawai
+  
+  // TAMBAHAN BARU: Menyimpan role si pembuat pengajuan
+  final Role requesterRole; 
+
   String nama;
   String nip;
   String jabatan;
   String masaKerja;
   String unitKerja;
-
-  // Data Cuti
   String jenisCuti;
   String alasan;
   DateTime tanggalMulai;
   DateTime tanggalSelesai;
   String alamatSelamaCuti;
   String noTelp;
-
-  // Approval Status
   LeaveStatus status;
 
   LeaveRequest({
     required this.id,
+    required this.requesterRole, // Wajib diisi
     required this.nama,
     required this.nip,
     required this.jabatan,

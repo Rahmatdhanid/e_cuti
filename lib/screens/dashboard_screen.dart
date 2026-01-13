@@ -15,13 +15,25 @@ class DashboardScreen extends StatefulWidget {
 }
 
 class _DashboardScreenState extends State<DashboardScreen> {
+  
+  // LOGIKA FILTER
   List<LeaveRequest> get filteredList {
     if (widget.role == Role.user) {
-      return mockDatabase;
-    } else if (widget.role == Role.kabid) {
-      return mockDatabase.where((e) => e.status == LeaveStatus.pendingKabid).toList();
-    } else {
-      return mockDatabase.where((e) => e.status == LeaveStatus.pendingKadin).toList();
+      return mockDatabase.where((e) => e.requesterRole == Role.user).toList();
+    } 
+    else if (widget.role == Role.kabid) {
+      return mockDatabase.where((e) {
+        bool isTaskForMe = (e.status == LeaveStatus.pendingKabid);
+        bool isMyOwnRequest = (e.requesterRole == Role.kabid);
+        return isTaskForMe || isMyOwnRequest;
+      }).toList();
+    } 
+    else {
+      return mockDatabase.where((e) {
+        bool isTaskForMe = (e.status == LeaveStatus.pendingKadin);
+        bool isMyOwnRequest = (e.requesterRole == Role.kadin);
+        return isTaskForMe || isMyOwnRequest;
+      }).toList();
     }
   }
 
@@ -61,28 +73,50 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 return _buildRequestCard(item);
               },
             ),
-      floatingActionButton: widget.role == Role.user
-          ? FloatingActionButton.extended(
-              onPressed: () async {
-                await Navigator.push(context, MaterialPageRoute(builder: (context) => const CreateLeaveForm()));
-                _refresh();
-              },
-              label: const Text("Ajukan Cuti"),
-              icon: const Icon(Icons.add),
-              backgroundColor: const Color(0xFF0D47A1),
-              foregroundColor: Colors.white,
-            )
-          : null,
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () async {
+          await Navigator.push(
+            context, 
+            MaterialPageRoute(builder: (context) => CreateLeaveForm(userRole: widget.role))
+          );
+          _refresh();
+        },
+        label: const Text("Ajukan Cuti"),
+        icon: const Icon(Icons.add),
+        backgroundColor: _getRoleColor(),
+        foregroundColor: Colors.white,
+      ),
     );
   }
 
+  // Warna Tema Aplikasi (Header & Tombol) tetap sesuai Login
   Color _getRoleColor() {
     if (widget.role == Role.user) return const Color(0xFF0D47A1);
-    if (widget.role == Role.kabid) return Colors.orange[800]!;
-    return Colors.green[800]!;
+    if (widget.role == Role.kabid) return Colors.green[800]!;
+    // Hapus 'if' terakhir, langsung return saja agar komputer yakin pasti ada nilainya
+    return Colors.orange[800]!; 
   }
 
   Widget _buildRequestCard(LeaveRequest item) {
+    // --- LOGIKA WARNA LABEL (KONSTAN SESUAI ROLE PEMBUAT) ---
+    String prefixLabel = "";
+    Color labelColor = Colors.black; // Default
+    
+    switch (item.requesterRole) {
+      case Role.user:
+        prefixLabel = "[PEGAWAI]";
+        labelColor = Colors.blue[700]!; // Biru
+        break;
+      case Role.kabid:
+        prefixLabel = "[KABID]";
+        labelColor = Colors.green[700]!; // Hijau (Sesuai Request)
+        break;
+      case Role.kadin:
+        prefixLabel = "[KADIN]";
+        labelColor = Colors.orange[800]!; // Orange (Sesuai Request)
+        break;
+    }
+
     return Card(
       margin: const EdgeInsets.only(bottom: 16),
       elevation: 2,
@@ -108,8 +142,28 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Expanded(
-                    child: Text(item.jenisCuti, 
-                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.black87)
+                    child: RichText(
+                      text: TextSpan(
+                        children: [
+                          TextSpan(
+                            text: "$prefixLabel ", 
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold, 
+                              fontSize: 14, 
+                              // Gunakan warna fix yang sudah ditentukan di atas
+                              color: labelColor 
+                            )
+                          ),
+                          TextSpan(
+                            text: item.jenisCuti, 
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold, 
+                              fontSize: 16, 
+                              color: Colors.black87
+                            )
+                          ),
+                        ]
+                      ),
                     ),
                   ),
                   _buildStatusChip(item.status),
@@ -122,7 +176,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
               const SizedBox(height: 10),
               Align(
                 alignment: Alignment.centerRight,
-                child: Text("Ketuk untuk detail & verifikasi >", style: TextStyle(fontSize: 12, color: _getRoleColor(), fontWeight: FontWeight.bold)),
+                child: Text("Ketuk untuk detail >", style: TextStyle(fontSize: 12, color: _getRoleColor(), fontWeight: FontWeight.bold)),
               )
             ],
           ),
