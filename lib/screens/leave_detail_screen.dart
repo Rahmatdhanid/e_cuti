@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../models/leave_model.dart';
+import 'print_letter_screen.dart'; // Jangan lupa import file print tadi
 
 class LeaveDetailScreen extends StatefulWidget {
   final LeaveRequest request;
@@ -36,6 +37,11 @@ class _LeaveDetailScreenState extends State<LeaveDetailScreen> {
     if (widget.userRole == Role.kabid && widget.request.status == LeaveStatus.pendingKabid) return true;
     if (widget.userRole == Role.kadin && widget.request.status == LeaveStatus.pendingKadin) return true;
     return false;
+  }
+
+  // Cek apakah sudah disetujui sepenuhnya
+  bool get _isApproved {
+    return widget.request.status == LeaveStatus.approved;
   }
 
   @override
@@ -75,6 +81,7 @@ class _LeaveDetailScreenState extends State<LeaveDetailScreen> {
 
             const SizedBox(height: 40),
             
+            // --- TOMBOL AKSI VERIFIKASI (Untuk Atasan) ---
             if (_canAction) 
               Row(
                 children: [
@@ -86,7 +93,7 @@ class _LeaveDetailScreenState extends State<LeaveDetailScreen> {
                         side: const BorderSide(color: Colors.red),
                         padding: const EdgeInsets.symmetric(vertical: 16),
                       ),
-                      child: const Text("TOLAK PERMOHONAN"),
+                      child: const Text("TOLAK"),
                     ),
                   ),
                   const SizedBox(width: 16),
@@ -103,6 +110,32 @@ class _LeaveDetailScreenState extends State<LeaveDetailScreen> {
                   ),
                 ],
               ),
+
+            // --- TOMBOL CETAK SURAT (Muncul Jika Sudah Disetujui) ---
+            if (_isApproved)
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton.icon(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => PrintLetterScreen(request: widget.request),
+                      ),
+                    );
+                  },
+                  icon: const Icon(Icons.print),
+                  label: const Text("CETAK SURAT IZIN (PDF)"),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.blue[800],
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    elevation: 4,
+                  ),
+                ),
+              ),
+              
+             const SizedBox(height: 20),
           ],
         ),
       ),
