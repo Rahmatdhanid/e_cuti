@@ -1,12 +1,10 @@
-// File: lib/models/leave_model.dart
-
 enum LeaveStatus { pendingKabid, pendingKadin, approved, rejected }
 enum Role { user, kabid, kadin }
 
 class LeaveRequest {
   String id;
   
-  // TAMBAHAN BARU: Menyimpan role si pembuat pengajuan
+  // Menyimpan role si pembuat pengajuan
   final Role requesterRole; 
 
   String nama;

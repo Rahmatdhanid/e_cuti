@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../models/leave_model.dart';
-import 'print_letter_screen.dart'; // Jangan lupa import file print tadi
+import 'print_letter_screen.dart'; 
 
 class LeaveDetailScreen extends StatefulWidget {
   final LeaveRequest request;

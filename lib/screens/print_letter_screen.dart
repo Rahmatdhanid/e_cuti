@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'dart:typed_data'; // <--- TAMBAHAN PENTING (Agar Uint8List tidak error)
+import 'dart:typed_data'; 
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw; 
 import 'package:printing/printing.dart'; 
@@ -24,7 +24,7 @@ class PrintLetterScreen extends StatelessWidget {
   Future<Uint8List> _generatePdf(PdfPageFormat format, LeaveRequest request) async {
     final pdf = pw.Document();
 
-    // Mengambil font standar
+   
     final fontRegular = await PdfGoogleFonts.openSansRegular();
     final fontBold = await PdfGoogleFonts.openSansBold();
 

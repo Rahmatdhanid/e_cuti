@@ -1,4 +1,3 @@
-// File: lib/screens/create_leave_form.dart
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../models/leave_model.dart';
@@ -15,7 +14,7 @@ class CreateLeaveForm extends StatefulWidget {
 class _CreateLeaveFormState extends State<CreateLeaveForm> {
   final _formKey = GlobalKey<FormState>();
   
-  // Controller
+ 
   final _namaCtrl = TextEditingController(); 
   final _nipCtrl = TextEditingController(); 
   final _jabatanCtrl = TextEditingController(); 
@@ -91,7 +90,7 @@ class _CreateLeaveFormState extends State<CreateLeaveForm> {
 
       mockDatabase.insert(0, LeaveRequest(
         id: DateTime.now().toString(),
-        requesterRole: widget.userRole, // <-- KITA SIMPAN ROLE PEMBUATNYA
+        requesterRole: widget.userRole, // <-- SIMPAN ROLE PEMBUATNYA
         nama: _namaCtrl.text,
         nip: _nipCtrl.text,
         jabatan: _jabatanCtrl.text,
