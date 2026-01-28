@@ -95,7 +95,7 @@ class _RiwayatScreenState extends State<RiwayatScreen> {
           await Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => LeaveDetailScreen(request: item, userRole: widget.role),
+              builder: (context) => LeaveDetailScreen(request: item, userRole: widget.role, userName: widget.userName),
             ),
           );
           _refresh(); 

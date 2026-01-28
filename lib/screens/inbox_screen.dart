@@ -6,7 +6,8 @@ import 'leave_detail_screen.dart';
 
 class InboxScreen extends StatefulWidget {
   final Role role;
-  const InboxScreen({super.key, required this.role});
+  final String userName; 
+  const InboxScreen({super.key, required this.role, required this.userName}); // Update constructor
 
   @override
   State<InboxScreen> createState() => _InboxScreenState();
@@ -95,7 +96,7 @@ class _InboxScreenState extends State<InboxScreen> {
           await Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => LeaveDetailScreen(request: item, userRole: widget.role),
+              builder: (context) => LeaveDetailScreen(request: item, userRole: widget.role, userName: widget.userName),
             ),
           );
           _refresh(); 

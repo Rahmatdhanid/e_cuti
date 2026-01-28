@@ -3,10 +3,9 @@ enum Role { user, kabid, kadin }
 
 class LeaveRequest {
   String id;
-  
-  // Menyimpan role si pembuat pengajuan
-  final Role requesterRole; 
+  Role requesterRole; 
 
+  // DATA PEGAWAI
   String nama;
   String nip;
   String jabatan;
@@ -18,11 +17,16 @@ class LeaveRequest {
   DateTime tanggalSelesai;
   String alamatSelamaCuti;
   String noTelp;
+  
   LeaveStatus status;
+
+  // --- TAMBAHAN BARU: DATA PENYETUJU ---
+  String? kabidName; // Nama Kabid yang ACC
+  String? kadinName; // Nama Kadin yang ACC
 
   LeaveRequest({
     required this.id,
-    required this.requesterRole, // Wajib diisi
+    required this.requesterRole,
     required this.nama,
     required this.nip,
     required this.jabatan,
@@ -35,5 +39,7 @@ class LeaveRequest {
     required this.alamatSelamaCuti,
     required this.noTelp,
     this.status = LeaveStatus.pendingKabid,
+    this.kabidName, // Boleh kosong awal-awal
+    this.kadinName, // Boleh kosong awal-awal
   });
 }

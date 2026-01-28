@@ -1,13 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../models/leave_model.dart';
-import 'print_letter_screen.dart'; 
+import 'print_letter_screen.dart';
 
 class LeaveDetailScreen extends StatefulWidget {
   final LeaveRequest request;
   final Role userRole;
+  final String userName; // Nama user yang sedang login (untuk TTD)
 
-  const LeaveDetailScreen({super.key, required this.request, required this.userRole});
+  const LeaveDetailScreen({
+    super.key, 
+    required this.request, 
+    required this.userRole,
+    required this.userName,
+  });
 
   @override
   State<LeaveDetailScreen> createState() => _LeaveDetailScreenState();
@@ -20,10 +26,13 @@ class _LeaveDetailScreenState extends State<LeaveDetailScreen> {
       if (!approved) {
         widget.request.status = LeaveStatus.rejected;
       } else {
+        // --- LOGIKA SIMPAN NAMA PENYETUJU ---
         if (widget.userRole == Role.kabid) {
           widget.request.status = LeaveStatus.pendingKadin;
+          widget.request.kabidName = widget.userName; // Simpan Nama Kabid
         } else if (widget.userRole == Role.kadin) {
           widget.request.status = LeaveStatus.approved;
+          widget.request.kadinName = widget.userName; // Simpan Nama Kadin
         }
       }
     });
@@ -39,19 +48,12 @@ class _LeaveDetailScreenState extends State<LeaveDetailScreen> {
     return false;
   }
 
-  // Cek apakah sudah disetujui sepenuhnya
-  bool get _isApproved {
-    return widget.request.status == LeaveStatus.approved;
-  }
+  bool get _isApproved => widget.request.status == LeaveStatus.approved;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("Detail Permintaan Cuti"),
-        backgroundColor: Colors.white,
-        surfaceTintColor: Colors.white,
-      ),
+      appBar: AppBar(title: const Text("Detail Permintaan Cuti")),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
         child: Column(
@@ -60,14 +62,17 @@ class _LeaveDetailScreenState extends State<LeaveDetailScreen> {
             Center(child: _buildStatusBanner()),
             const SizedBox(height: 24),
 
+            // --- DATA PEGAWAI (LENGKAP) ---
             _sectionHeader("Data Pegawai"),
             _detailRow("Nama Lengkap", widget.request.nama),
             _detailRow("NIP", widget.request.nip),
             _detailRow("Jabatan", widget.request.jabatan),
             _detailRow("Unit Kerja", widget.request.unitKerja),
-            _detailRow("Masa Kerja", widget.request.masaKerja),
+            _detailRow("Masa Kerja", widget.request.masaKerja), // <-- Sudah dikembalikan
 
             const SizedBox(height: 24),
+            
+            // --- DETAIL CUTI (LENGKAP) ---
             _sectionHeader("Detail Cuti"),
             _detailRow("Jenis Cuti", widget.request.jenisCuti),
             _detailRow("Alasan", widget.request.alasan),
@@ -75,24 +80,22 @@ class _LeaveDetailScreenState extends State<LeaveDetailScreen> {
             _detailRow("Tanggal Selesai", DateFormat('dd MMMM yyyy').format(widget.request.tanggalSelesai)),
             
             const SizedBox(height: 24),
-            _sectionHeader("Kontak Selama Cuti"),
+
+            // --- KONTAK (LENGKAP) ---
+            _sectionHeader("Kontak Selama Cuti"), // <-- Sudah dikembalikan
             _detailRow("Alamat", widget.request.alamatSelamaCuti),
             _detailRow("No. Telepon", widget.request.noTelp),
 
             const SizedBox(height: 40),
             
-            // --- TOMBOL AKSI VERIFIKASI (Untuk Atasan) ---
+            // --- TOMBOL AKSI (SETUJUI/TOLAK) ---
             if (_canAction) 
               Row(
                 children: [
                   Expanded(
                     child: OutlinedButton(
                       onPressed: () => _processRequest(false),
-                      style: OutlinedButton.styleFrom(
-                        foregroundColor: Colors.red,
-                        side: const BorderSide(color: Colors.red),
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                      ),
+                      style: OutlinedButton.styleFrom(foregroundColor: Colors.red),
                       child: const Text("TOLAK"),
                     ),
                   ),
@@ -100,18 +103,14 @@ class _LeaveDetailScreenState extends State<LeaveDetailScreen> {
                   Expanded(
                     child: ElevatedButton(
                       onPressed: () => _processRequest(true),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.green,
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                      ),
+                      style: ElevatedButton.styleFrom(backgroundColor: Colors.green, foregroundColor: Colors.white),
                       child: const Text("SETUJUI"),
                     ),
                   ),
                 ],
               ),
 
-            // --- TOMBOL CETAK SURAT (Muncul Jika Sudah Disetujui) ---
+            // --- TOMBOL CETAK ---
             if (_isApproved)
               SizedBox(
                 width: double.infinity,
@@ -126,15 +125,9 @@ class _LeaveDetailScreenState extends State<LeaveDetailScreen> {
                   },
                   icon: const Icon(Icons.print),
                   label: const Text("CETAK SURAT IZIN (PDF)"),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.blue[800],
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    elevation: 4,
-                  ),
+                  style: ElevatedButton.styleFrom(backgroundColor: Colors.blue[800], foregroundColor: Colors.white),
                 ),
               ),
-              
              const SizedBox(height: 20),
           ],
         ),
@@ -143,19 +136,19 @@ class _LeaveDetailScreenState extends State<LeaveDetailScreen> {
   }
 
   Widget _buildStatusBanner() {
-    Color color;
-    String text;
-    IconData icon;
-    
+    String text = "Status: ${widget.request.status.name}";
+    Color color = Colors.grey;
+    IconData icon = Icons.info;
+
     switch (widget.request.status) {
       case LeaveStatus.pendingKabid:
-        color = Colors.orange; text = "Menunggu Verifikasi Kabid"; icon = Icons.hourglass_empty; break;
+        text = "Menunggu Verifikasi Kabid"; color = Colors.orange; icon = Icons.hourglass_empty; break;
       case LeaveStatus.pendingKadin:
-        color = Colors.blue; text = "Menunggu Persetujuan Kadin"; icon = Icons.hourglass_top; break;
+        text = "Menunggu Persetujuan Kadin"; color = Colors.blue; icon = Icons.hourglass_top; break;
       case LeaveStatus.approved:
-        color = Colors.green; text = "Permohonan Disetujui"; icon = Icons.check_circle; break;
+        text = "Permohonan Disetujui"; color = Colors.green; icon = Icons.check_circle; break;
       case LeaveStatus.rejected:
-        color = Colors.red; text = "Permohonan Ditolak"; icon = Icons.cancel; break;
+        text = "Permohonan Ditolak"; color = Colors.red; icon = Icons.cancel; break;
     }
 
     return Container(
@@ -164,7 +157,7 @@ class _LeaveDetailScreenState extends State<LeaveDetailScreen> {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, color: color),
+          Icon(icon, color: color, size: 20),
           const SizedBox(width: 8),
           Text(text, style: TextStyle(color: color, fontWeight: FontWeight.bold)),
         ],
@@ -172,29 +165,6 @@ class _LeaveDetailScreenState extends State<LeaveDetailScreen> {
     );
   }
 
-  Widget _sectionHeader(String title) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(title.toUpperCase(), style: const TextStyle(color: Colors.grey, fontWeight: FontWeight.bold, fontSize: 12, letterSpacing: 1.2)),
-          const Divider(),
-        ],
-      ),
-    );
-  }
-
-  Widget _detailRow(String label, String value) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SizedBox(width: 120, child: Text(label, style: const TextStyle(color: Colors.grey))),
-          Expanded(child: Text(value, style: const TextStyle(fontWeight: FontWeight.w500, color: Colors.black87))),
-        ],
-      ),
-    );
-  }
+  Widget _sectionHeader(String title) => Padding(padding: const EdgeInsets.only(bottom: 8), child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text(title.toUpperCase(), style: const TextStyle(color: Colors.grey, fontWeight: FontWeight.bold, fontSize: 12, letterSpacing: 1.2)), const Divider()]));
+  Widget _detailRow(String label, String value) => Padding(padding: const EdgeInsets.only(bottom: 12), child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [SizedBox(width: 130, child: Text(label, style: TextStyle(color: Colors.grey[700]))), Expanded(child: Text(value, style: const TextStyle(fontWeight: FontWeight.w600, color: Colors.black87)))]));
 }

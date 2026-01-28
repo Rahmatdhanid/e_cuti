@@ -79,7 +79,7 @@ class DashboardScreen extends StatelessWidget {
                       onTap: () {
                         Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (context) => InboxScreen(role: role)),
+                          MaterialPageRoute(builder: (context) => InboxScreen(role: role, userName: userName)),
                         );
                       },
                     ),
