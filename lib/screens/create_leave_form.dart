@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../models/leave_model.dart';
-import '../data/mock_data.dart';
+import '../data/mock_data.dart'; 
 
 class CreateLeaveForm extends StatefulWidget {
   final Role userRole; 
@@ -14,7 +14,6 @@ class CreateLeaveForm extends StatefulWidget {
 class _CreateLeaveFormState extends State<CreateLeaveForm> {
   final _formKey = GlobalKey<FormState>();
   
- 
   final _namaCtrl = TextEditingController(); 
   final _nipCtrl = TextEditingController(); 
   final _jabatanCtrl = TextEditingController(); 
@@ -24,7 +23,9 @@ class _CreateLeaveFormState extends State<CreateLeaveForm> {
   final _alamatCtrl = TextEditingController(); 
   final _telpCtrl = TextEditingController();
 
-  String _selectedLeaveType = "Cuti Tahunan"; 
+
+  String? _selectedLeaveType; 
+  
   DateTime _startDate = DateTime.now();
   DateTime _endDate = DateTime.now();
 
@@ -44,13 +45,41 @@ class _CreateLeaveFormState extends State<CreateLeaveForm> {
             const SizedBox(height: 10),
             Row(children: [Expanded(child: _buildTextField("Masa Kerja", _masaKerjaCtrl)), const SizedBox(width: 10), Expanded(child: _buildTextField("Unit Kerja", _unitCtrl))]),
             const SizedBox(height: 24),
+            
             _sectionTitle("Detail Cuti"),
+            
+            
             DropdownButtonFormField<String>(
               value: _selectedLeaveType,
               decoration: const InputDecoration(labelText: "Jenis Cuti"),
-              items: ["Cuti Tahunan", "Cuti Besar", "Cuti Sakit", "Cuti Melahirkan", "Cuti Alasan Penting"].map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
-              onChanged: (v) => setState(() => _selectedLeaveType = v!),
+              hint: const Text("Pilih Jenis Cuti"),
+              // Mengambil item dari leaveQuotas di mock_data.dart
+              items: leaveQuotas.keys.map((String key) {
+                int sisa = leaveQuotas[key] ?? 0;
+                bool isHabis = sisa <= 0;
+                return DropdownMenuItem<String>(
+                  value: key,
+                  // Menampilkan Nama Cuti beserta Sisanya
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(key),
+                      Text(
+                        "(Sisa: $sisa)",
+                        style: TextStyle(
+                          fontSize: 12, 
+                          color: isHabis ? Colors.red : Colors.grey,
+                          fontWeight: isHabis ? FontWeight.bold : FontWeight.normal
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              }).toList(),
+              onChanged: (v) => setState(() => _selectedLeaveType = v),
+              validator: (v) => v == null ? "Wajib pilih jenis cuti" : null,
             ),
+            
             const SizedBox(height: 10),
             _buildTextField("Alasan Cuti", _alasanCtrl),
             const SizedBox(height: 10),
@@ -82,21 +111,37 @@ class _CreateLeaveFormState extends State<CreateLeaveForm> {
   void _submitForm() {
     if (_formKey.currentState!.validate()) {
       
-      // LOGIKA STATUS:
-      // Pegawai -> PendingKabid
-      // Kabid -> PendingKadin
-      // Kadin -> PendingKadin
+      // --- CEK KUOTA CUTI ---
+      int sisaKuota = leaveQuotas[_selectedLeaveType] ?? 0;
+
+      
+      if (sisaKuota <= 0) {
+        showDialog(
+          context: context,
+          builder: (ctx) => AlertDialog(
+            title: const Text("Kuota Habis"),
+            content: Text("Jatah untuk $_selectedLeaveType sudah habis (0)."),
+            actions: [TextButton(onPressed: () => Navigator.pop(ctx), child: const Text("OK"))],
+          ),
+        );
+        return; 
+      }
+
+      
+      leaveQuotas[_selectedLeaveType!] = sisaKuota - 1;
+
+      
       LeaveStatus status = widget.userRole == Role.user ? LeaveStatus.pendingKabid : LeaveStatus.pendingKadin;
 
       mockDatabase.insert(0, LeaveRequest(
         id: DateTime.now().toString(),
-        requesterRole: widget.userRole, // <-- SIMPAN ROLE PEMBUATNYA
+        requesterRole: widget.userRole,
         nama: _namaCtrl.text,
         nip: _nipCtrl.text,
         jabatan: _jabatanCtrl.text,
         masaKerja: _masaKerjaCtrl.text,
         unitKerja: _unitCtrl.text,
-        jenisCuti: _selectedLeaveType,
+        jenisCuti: _selectedLeaveType!,
         alasan: _alasanCtrl.text,
         tanggalMulai: _startDate,
         tanggalSelesai: _endDate,
@@ -106,7 +151,9 @@ class _CreateLeaveFormState extends State<CreateLeaveForm> {
       ));
       
       Navigator.pop(context); 
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Permintaan cuti berhasil dikirim!")));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Berhasil! Sisa kuota $_selectedLeaveType: ${sisaKuota - 1}"))
+      );
     }
   }
 }

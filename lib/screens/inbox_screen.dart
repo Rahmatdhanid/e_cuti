@@ -7,7 +7,7 @@ import 'leave_detail_screen.dart';
 class InboxScreen extends StatefulWidget {
   final Role role;
   final String userName; 
-  const InboxScreen({super.key, required this.role, required this.userName}); // Update constructor
+  const InboxScreen({super.key, required this.role, required this.userName}); 
 
   @override
   State<InboxScreen> createState() => _InboxScreenState();
@@ -15,27 +15,25 @@ class InboxScreen extends StatefulWidget {
 
 class _InboxScreenState extends State<InboxScreen> {
   
-  // INI HANYA YANG STATUSNYA MASIH PROSES (PENDING)
+  
   List<LeaveRequest> get filteredList {
     return mockDatabase.where((e) {
       
-      // Cek apakah statusnya masih pending (Belum final)
+      
       bool isPending = (e.status == LeaveStatus.pendingKabid || e.status == LeaveStatus.pendingKadin);
       
-      // Jika statusnya sudah Approved/Rejected, JANGAN tampilkan di sini (Pindah ke Riwayat)
+      
       if (!isPending) return false;
 
-      // --- FILTER KEPEMILIKAN ---
       
-      // 1. Apakah ini milik saya sendiri?
       bool isMyOwnRequest = (e.requesterRole == widget.role);
 
-      // 2. Apakah ini tugas verifikasi untuk saya?
+      
       bool isTaskForMe = false;
       if (widget.role == Role.kabid && e.status == LeaveStatus.pendingKabid) isTaskForMe = true;
       if (widget.role == Role.kadin && e.status == LeaveStatus.pendingKadin) isTaskForMe = true;
 
-      // Tampilkan jika ini milik saya ATAU tugas saya
+     
       return isMyOwnRequest || isTaskForMe;
 
     }).toList();

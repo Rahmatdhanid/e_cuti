@@ -54,7 +54,7 @@ class DashboardScreen extends StatelessWidget {
                 mainAxisSpacing: 16,
                 children: [
                   
-                  // 1. TOMBOL CUTI BUAT SEMUA 
+                  
                   _buildMenuCard(
                     context,
                     title: "Buat Cuti",
@@ -68,8 +68,7 @@ class DashboardScreen extends StatelessWidget {
                     },
                   ),
 
-                  // 2. TOMBOL INBOX (HANYA KABID & KADIN)
-                  // Pegawai tidak perlu ini karena semua infonya masuk Riwayat
+                  
                   if (role != Role.user)
                     _buildMenuCard(
                       context,
@@ -84,10 +83,10 @@ class DashboardScreen extends StatelessWidget {
                       },
                     ),
 
-                  // 3. TOMBOL RIWAYAT
+                  
                   _buildMenuCard(
                     context,
-                    // Judul disesuaikan agar tidak bingung
+                    
                     title: role == Role.user ? "Riwayat & Status" : "Riwayat (Selesai)",
                     icon: Icons.history_edu,
                     color: Colors.orange,

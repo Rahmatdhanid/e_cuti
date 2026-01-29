@@ -1,4 +1,15 @@
 import '../models/leave_model.dart';
 
-// Mock Data Storage (Simulasi Database Global)
-List<LeaveRequest> mockDatabase = [];
+
+List<LeaveRequest> mockDatabase = [
+  
+];
+
+
+Map<String, int> leaveQuotas = {
+  "Cuti Tahunan": 10,
+  "Cuti Besar": 10,
+  "Cuti Sakit": 10,
+  "Cuti Melahirkan": 10,
+  "Cuti Alasan Penting": 10, 
+};

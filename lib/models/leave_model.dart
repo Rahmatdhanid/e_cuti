@@ -20,7 +20,7 @@ class LeaveRequest {
   
   LeaveStatus status;
 
-  // --- TAMBAHAN BARU: DATA PENYETUJU ---
+  // --- DATA PENYETUJU ---
   String? kabidName; // Nama Kabid yang ACC
   String? kadinName; // Nama Kadin yang ACC
 
@@ -39,7 +39,7 @@ class LeaveRequest {
     required this.alamatSelamaCuti,
     required this.noTelp,
     this.status = LeaveStatus.pendingKabid,
-    this.kabidName, // Boleh kosong awal-awal
-    this.kadinName, // Boleh kosong awal-awal
+    this.kabidName, 
+    this.kadinName, 
   });
 }

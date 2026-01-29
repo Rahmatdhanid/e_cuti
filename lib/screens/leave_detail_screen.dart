@@ -6,7 +6,7 @@ import 'print_letter_screen.dart';
 class LeaveDetailScreen extends StatefulWidget {
   final LeaveRequest request;
   final Role userRole;
-  final String userName; // Nama user yang sedang login (untuk TTD)
+  final String userName; 
 
   const LeaveDetailScreen({
     super.key, 
@@ -26,13 +26,13 @@ class _LeaveDetailScreenState extends State<LeaveDetailScreen> {
       if (!approved) {
         widget.request.status = LeaveStatus.rejected;
       } else {
-        // --- LOGIKA SIMPAN NAMA PENYETUJU ---
+        
         if (widget.userRole == Role.kabid) {
           widget.request.status = LeaveStatus.pendingKadin;
-          widget.request.kabidName = widget.userName; // Simpan Nama Kabid
+          widget.request.kabidName = widget.userName; 
         } else if (widget.userRole == Role.kadin) {
           widget.request.status = LeaveStatus.approved;
-          widget.request.kadinName = widget.userName; // Simpan Nama Kadin
+          widget.request.kadinName = widget.userName; 
         }
       }
     });
@@ -62,17 +62,17 @@ class _LeaveDetailScreenState extends State<LeaveDetailScreen> {
             Center(child: _buildStatusBanner()),
             const SizedBox(height: 24),
 
-            // --- DATA PEGAWAI (LENGKAP) ---
+            
             _sectionHeader("Data Pegawai"),
             _detailRow("Nama Lengkap", widget.request.nama),
             _detailRow("NIP", widget.request.nip),
             _detailRow("Jabatan", widget.request.jabatan),
             _detailRow("Unit Kerja", widget.request.unitKerja),
-            _detailRow("Masa Kerja", widget.request.masaKerja), // <-- Sudah dikembalikan
+            _detailRow("Masa Kerja", widget.request.masaKerja),
 
             const SizedBox(height: 24),
             
-            // --- DETAIL CUTI (LENGKAP) ---
+            
             _sectionHeader("Detail Cuti"),
             _detailRow("Jenis Cuti", widget.request.jenisCuti),
             _detailRow("Alasan", widget.request.alasan),
@@ -81,14 +81,14 @@ class _LeaveDetailScreenState extends State<LeaveDetailScreen> {
             
             const SizedBox(height: 24),
 
-            // --- KONTAK (LENGKAP) ---
-            _sectionHeader("Kontak Selama Cuti"), // <-- Sudah dikembalikan
+            
+            _sectionHeader("Kontak Selama Cuti"), 
             _detailRow("Alamat", widget.request.alamatSelamaCuti),
             _detailRow("No. Telepon", widget.request.noTelp),
 
             const SizedBox(height: 40),
             
-            // --- TOMBOL AKSI (SETUJUI/TOLAK) ---
+           
             if (_canAction) 
               Row(
                 children: [
@@ -110,7 +110,7 @@ class _LeaveDetailScreenState extends State<LeaveDetailScreen> {
                 ],
               ),
 
-            // --- TOMBOL CETAK ---
+            
             if (_isApproved)
               SizedBox(
                 width: double.infinity,
